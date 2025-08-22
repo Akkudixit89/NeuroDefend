@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Malware Detection Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 URL Malware Detection</h1>
+        <p><strong>Model Accuracy:</strong> {{ accuracy }}%</p>
+
+        <h2>Test URL Predictions</h2>
+        <table>
+            <tr>
+                <th>URL</th>
+                <th>Prediction</th>
+            </tr>
+            {% for url, label in results %}
+            <tr>
+                <td>{{ url }}</td>
+                <td>
+                    {% if label == 0 %}
+                        ✅ Benign
+                    {% elif label == 1 %}
+                        ⚠️ Suspicious
+                    {% else %}
+                        ❌ Malicious
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>

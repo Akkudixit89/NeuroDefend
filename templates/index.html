@@ -3,33 +3,92 @@
 <head>
     <title>Malware Detection Results</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .scroll-table {
+            max-height: 500px;  /* adjust height */
+            overflow-y: auto;
+            border: 1px solid #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+            word-break: break-all; /* handles long URLs */
+        }
+        th {
+            background: #f4f4f4;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .pred-benign {
+            color: green;
+            font-weight: bold;
+        }
+        .pred-malicious {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>🔐 URL Malware Detection</h1>
-        <p><strong>Model Accuracy:</strong> {{ accuracy }}%</p>
 
+        <!-- Show model accuracies -->
+        <h2>Model Accuracies</h2>
+        <ul>
+            <li><strong>Logistic Regression:</strong> {{ accuracies["Logistic Regression"] }}%</li>
+            <li><strong>Random Forest:</strong> {{ accuracies["Random Forest"] }}%</li>
+            <li><strong>XGBoost:</strong> {{ accuracies["XGBoost"] }}%</li>
+        </ul>
+
+        <!-- Show predictions from all models -->
         <h2>Test URL Predictions</h2>
-        <table>
-            <tr>
-                <th>URL</th>
-                <th>Prediction</th>
-            </tr>
-            {% for url, label in results %}
-            <tr>
-                <td>{{ url }}</td>
-                <td>
-                    {% if label == 0 %}
-                        ✅ Benign
-                    {% elif label == 1 %}
-                        ⚠️ Suspicious
-                    {% else %}
-                        ❌ Malicious
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
+        <div class="scroll-table">
+            <table>
+                <tr>
+                    <th>URL</th>
+                    <th>Logistic Regression</th>
+                    <th>Random Forest</th>
+                    <th>XGBoost</th>
+                </tr>
+                {% for i in range(results["Logistic Regression"]|length) %}
+                <tr>
+                    <!-- URL -->
+                    <td>{{ results["Logistic Regression"][i][0] }}</td>
+
+                    <!-- Logistic Regression Prediction -->
+                    <td>
+                        {% set pred = results["Logistic Regression"][i][1] %}
+                        <span class="{{ 'pred-benign' if pred == 'Benign' else 'pred-malicious' }}">
+                            {{ pred }}
+                        </span>
+                    </td>
+
+                    <!-- Random Forest Prediction -->
+                    <td>
+                        {% set pred = results["Random Forest"][i][1] %}
+                        <span class="{{ 'pred-benign' if pred == 'Benign' else 'pred-malicious' }}">
+                            {{ pred }}
+                        </span>
+                    </td>
+
+                    <!-- XGBoost Prediction -->
+                    <td>
+                        {% set pred = results["XGBoost"][i][1] %}
+                        <span class="{{ 'pred-benign' if pred == 'Benign' else 'pred-malicious' }}">
+                            {{ pred }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
     </div>
 </body>
 </html>

@@ -1,26 +1,114 @@
 body {
     font-family: Arial, sans-serif;
-    background: #f0f0f0;
+    background: #f0f2f5;
     padding: 20px;
+    margin: 0;
     text-align: center;
+    color: #333;
 }
 
 .container {
     background-color: #fff;
     margin: auto;
     padding: 30px;
-    width: 60%;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    border-radius: 10px;
+    width: 70%;
+    max-width: 1000px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-radius: 12px;
 }
 
+h1 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+h2 {
+    margin-top: 25px;
+    color: #34495e;
+}
+
+/* Accuracy list */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0 20px 0;
+}
+ul li {
+    margin: 6px 0;
+    font-size: 16px;
+}
+
+/* Scrollable table wrapper */
+.scroll-table {
+    max-height: 500px;   /* adjust for dataset size */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    margin-top: 15px;
+    border-radius: 8px;
+}
+
+/* Table styling */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    font-size: 15px;
 }
 
 th, td {
     padding: 12px;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+    word-break: break-all; /* handles long URLs */
+}
+
+th {
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Prediction labels as badges */
+td {
+    font-weight: bold;
+}
+
+.pred-benign {
+    color: #155724;
+    background-color: #d4edda;
+    padding: 5px 10px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.pred-malicious {
+    color: #721c24;
+    background-color: #f8d7da;
+    padding: 5px 10px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .scroll-table {
+        max-height: 400px;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
 }

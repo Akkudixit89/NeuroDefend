@@ -1,20 +1,18 @@
 from flask import Flask, render_template
-from ml_model import train_model, get_test_predictions  # uses your code.py logic
+from ml_model import train_models, get_all_predictions  # updated import
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    # Train the model and get vectorizer and accuracy
-    model, vectorizer, accuracy = train_model()
+    # Train all models (LogReg, RandomForest, XGBoost)
+    models, vectorizer, accuracies, urls_data = train_models()
 
-    # Get test URLs and predictions
-    test_urls, predictions = get_test_predictions(model, vectorizer)
+    # Get predictions for ALL dataset URLs
+    results = get_all_predictions(models, vectorizer, urls_data)
 
-    # Combine URLs and predictions for the HTML template
-    results = list(zip(test_urls, predictions))
-
-    return render_template('index.html', accuracy=round(accuracy * 100, 2), results=results)
+    # No need to repackage again, results already has [(url, label)] format
+    return render_template("index.html", accuracies=accuracies, results=results)
 
 if __name__ == '__main__':
     app.run(debug=True)

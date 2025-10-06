@@ -1,94 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Malware Detection Results</title>
+    <title>Neuro Defend - Malware Detection</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .scroll-table {
-            max-height: 500px;  /* adjust height */
-            overflow-y: auto;
-            border: 1px solid #ccc;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            border: 1px solid #ddd;
-            text-align: left;
-            word-break: break-all; /* handles long URLs */
-        }
-        th {
-            background: #f4f4f4;
-            position: sticky;
-            top: 0;
-            z-index: 2;
-        }
-        .pred-benign {
-            color: green;
-            font-weight: bold;
-        }
-        .pred-malicious {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
+    <!-- Header -->
+    <div style="background: grey; padding: 20px; color: white; font-size: 28px; font-weight: bold;">
+        🛡 Neuro Defend
+    </div>
+
     <div class="container">
-        <h1>🔐 URL Malware Detection</h1>
+        <h2>Choose Input</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <div style="display:flex; justify-content:space-between; gap:10px;">
+                <input type="text" name="url_input" placeholder="Enter URL here" style="flex:1;">
+                <input type="file" name="apk_input" accept=".apk" style="flex:1;">
+                <input type="file" name="pe_input" accept=".exe,.dll" style="flex:1;">
+            </div>
+            <br>
+            <label for="model_choice"><strong>Select Model:</strong></label>
+            <select name="model_choice">
+                <option value="Random Forest" {% if model_choice=="Random Forest" %}selected{% endif %}>Random Forest</option>
+                <option value="XGBoost" {% if model_choice=="XGBoost" %}selected{% endif %}>XGBoost</option>
+            </select>
+            <br><br>
+            <button type="submit">Train & Predict</button>
+        </form>
 
-        <!-- Show model accuracies -->
-        <h2>Model Accuracies</h2>
-        <ul>
-            <li><strong>Logistic Regression:</strong> {{ accuracies["Logistic Regression"] }}%</li>
-            <li><strong>Random Forest:</strong> {{ accuracies["Random Forest"] }}%</li>
-            <li><strong>XGBoost:</strong> {{ accuracies["XGBoost"] }}%</li>
-        </ul>
+        <!-- Results -->
+        {% if prediction %}
+            <h2>Prediction Result</h2>
+            <p><strong>Output:</strong> 
+                <span class="{{ 'pred-benign' if prediction=='Benign' else 'pred-malicious' }}">{{ prediction }}</span>
+            </p>
+        {% endif %}
 
-        <!-- Show predictions from all models -->
-        <h2>Test URL Predictions</h2>
-        <div class="scroll-table">
-            <table>
-                <tr>
-                    <th>URL</th>
-                    <th>Logistic Regression</th>
-                    <th>Random Forest</th>
-                    <th>XGBoost</th>
-                </tr>
-                {% for i in range(results["Logistic Regression"]|length) %}
-                <tr>
-                    <!-- URL -->
-                    <td>{{ results["Logistic Regression"][i][0] }}</td>
+        <!-- Model accuracies -->
+        {% if accuracies %}
+            <h2>Model Accuracies</h2>
+            <ul>
+                <li><strong>Random Forest:</strong> {{ accuracies["Random Forest"] }}%</li>
+                <li><strong>XGBoost:</strong> {{ accuracies["XGBoost"] }}%</li>
+            </ul>
+        {% endif %}
 
-                    <!-- Logistic Regression Prediction -->
-                    <td>
-                        {% set pred = results["Logistic Regression"][i][1] %}
-                        <span class="{{ 'pred-benign' if pred == 'Benign' else 'pred-malicious' }}">
-                            {{ pred }}
-                        </span>
-                    </td>
-
-                    <!-- Random Forest Prediction -->
-                    <td>
-                        {% set pred = results["Random Forest"][i][1] %}
-                        <span class="{{ 'pred-benign' if pred == 'Benign' else 'pred-malicious' }}">
-                            {{ pred }}
-                        </span>
-                    </td>
-
-                    <!-- XGBoost Prediction -->
-                    <td>
-                        {% set pred = results["XGBoost"][i][1] %}
-                        <span class="{{ 'pred-benign' if pred == 'Benign' else 'pred-malicious' }}">
-                            {{ pred }}
-                        </span>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
+        <!-- Visualization -->
+        {% if f1 %}
+            <h2>Evaluation</h2>
+            <p><strong>F1 Score:</strong> {{ f1 }}</p>
+            <p><strong>Confusion Matrix:</strong> {{ cm }}</p>
+        {% endif %}
     </div>
 </body>
 </html>

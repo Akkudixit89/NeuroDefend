@@ -13,6 +13,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # Tokenizer for URLs
 # -----------------------
 def makeTokens(f):
+    """Custom tokenizer for splitting URLs into tokens."""
     tkns_BySlash = str(f.encode('utf-8')).split('/')
     total_Tokens = []
     for i in tkns_BySlash:
@@ -32,8 +33,10 @@ def makeTokens(f):
 # Train models
 # -----------------------
 def train_models():
+    """Train Random Forest and XGBoost models on the dataset."""
     urls_data = pd.read_csv("url_features.csv")
-    y = urls_data["malicious"]
+
+    y = urls_data["malicious"].astype(int)
     url_list = urls_data["URL"]
 
     vectorizer = TfidfVectorizer(tokenizer=makeTokens)
@@ -66,23 +69,40 @@ def train_models():
 
 
 # -----------------------
-# Predict single URL
+# Predict single URL safely
 # -----------------------
 def predict_url(url, model, vectorizer):
+    """Predict whether a single URL is benign or malicious."""
+    if not url.startswith("http"):
+        url = "http://" + url
     X = vectorizer.transform([url])
     pred = model.predict(X)[0]
     return "Malicious" if pred == 1 else "Benign"
 
 
 # -----------------------
-# Evaluate model (F1 + Confusion Matrix)
+# Evaluate model
 # -----------------------
 def evaluate_model(model, vectorizer, urls_data):
-    y = urls_data["malicious"]
+    """Evaluate model on full dataset to compute F1 and confusion matrix."""
+    y = urls_data["malicious"].astype(int)
     url_list = urls_data["URL"]
     X = vectorizer.transform(url_list)
-
     preds = model.predict(X)
-    f1 = round(f1_score(y, preds), 3)
+
+    f1 = round(f1_score(y, preds, average='weighted'), 3)
     cm = confusion_matrix(y, preds).tolist()
     return f1, cm
+
+
+# -----------------------
+# Dashboard metrics summary
+# -----------------------
+def get_metrics_summary(model_name, model, accuracies, f1, cm):
+    """Return summary dictionary for dynamic dashboard display."""
+    return {
+        "model": model_name,
+        "accuracy": accuracies.get(model_name, "N/A"),
+        "f1_score": f1,
+        "confusion_matrix": cm
+    }

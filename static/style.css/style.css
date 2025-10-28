@@ -1,61 +1,113 @@
+/* Global base colors */
+:root {
+  --bg-1: #071126;
+  --bg-2: #0b1220;
+  --muted: #9aa4b2;
+}
+
+/* Base body */
 body {
-    font-family: Arial, sans-serif;
-    background: #f0f2f5;
-    padding: 0;
-    margin: 0;
-    text-align: center;
-    color: #333;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+  color: #e6eef8;
 }
 
-.container {
-    background-color: #fff;
-    margin: 30px auto;
-    padding: 30px;
-    width: 70%;
-    max-width: 1000px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    border-radius: 12px;
+/* Landing page layout */
+.landing-bg {
+  padding: 40px 20px;
 }
 
-h1, h2 {
-    margin-bottom: 10px;
-    color: #2c3e50;
+/* Big full-width modular card */
+.landing-card {
+  max-width: 1400px;
+  width: 100%;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
 }
 
-ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 10px 0 20px 0;
-}
-ul li {
-    margin: 6px 0;
-    font-size: 16px;
-}
-
-.pred-benign {
-    color: #155724;
-    background-color: #d4edda;
-    padding: 5px 10px;
-    border-radius: 6px;
-    display: inline-block;
+/* Title section */
+.logo-pill {
+  display:inline-block;
+  background: linear-gradient(90deg,#4f46e5,#06b6d4);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:12px;
+  box-shadow: 0 10px 30px rgba(79,70,229,0.14);
+  font-size: 20px;
 }
 
-.pred-malicious {
-    color: #721c24;
-    background-color: #f8d7da;
-    padding: 5px 10px;
-    border-radius: 6px;
-    display: inline-block;
+.title-main {
+  font-size: 2.6rem;
+  margin-top: 6px;
+  color: #f0f6ff;
+  text-shadow: 0 8px 30px rgba(2,6,23,0.6);
 }
 
-button {
-    padding: 10px 20px;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+/* Input styling */
+.input-bar {
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  color: #e6eef8;
 }
-button:hover {
-    background: #2980b9;
+.input-bar:focus {
+  outline: none;
+  box-shadow: 0 8px 30px rgba(79,70,229,0.12);
+  border-color: rgba(79,70,229,0.6);
+}
+
+/* Analyze buttons */
+.btn-analyze {
+  min-width: 140px;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+.btn-analyze:hover {
+  transform: translateY(-3px);
+}
+
+.btn-primary {
+  background: linear-gradient(90deg,#4f46e5,#06b6d4);
+  border: none;
+  color: #fff;
+}
+.btn-warning {
+  background: linear-gradient(90deg,#f59e0b,#ef4444);
+  border: none;
+  color: #fff;
+}
+.btn-success {
+  background: linear-gradient(90deg,#10b981,#059669);
+  border: none;
+  color: #fff;
+}
+
+/* Footer GitHub button */
+.footer {
+  background: transparent;
+}
+.github-btn {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  background: linear-gradient(135deg, #111, #333);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+.github-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .title-main { font-size: 1.8rem; }
+  .landing-card { padding: 20px; }
+  .col-lg-7, .col-lg-5 { flex: 0 0 100%; max-width: 100%; }
 }

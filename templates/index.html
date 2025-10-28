@@ -1,56 +1,62 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <title>Neuro Defend - Malware Detection</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Neuro Defend — Home</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-    <!-- Header -->
-    <div style="background: grey; padding: 20px; color: white; font-size: 28px; font-weight: bold;">
-        🛡 Neuro Defend
-    </div>
+<body class="landing-bg d-flex align-items-center justify-content-center vh-100">
 
-    <div class="container">
-        <h2>Choose Input</h2>
-        <form method="POST" enctype="multipart/form-data">
-            <div style="display:flex; justify-content:space-between; gap:10px;">
-                <input type="text" name="url_input" placeholder="Enter URL here" style="flex:1;">
-                <input type="file" name="apk_input" accept=".apk" style="flex:1;">
-                <input type="file" name="pe_input" accept=".exe,.dll" style="flex:1;">
+  <div class="container">
+    <div class="card landing-card mx-auto shadow-lg p-4">
+      <div class="row align-items-center">
+        <!-- left: inputs -->
+        <div class="col-lg-6 px-4">
+          <h3 class="mb-3">Quick Scan</h3>
+
+          <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data" class="d-flex flex-column gap-3">
+
+            <!-- URL -->
+            <div class="input-group input-modular">
+              <input name="url_input" type="text" class="form-control input-bar" placeholder="Enter URL (example.com)">
+              <input type="hidden" name="which_input" id="which_input" value="url">
+              <select name="model_choice" class="form-select model-select">
+                <option value="Random Forest">Random Forest</option>
+                <option value="XGBoost">XGBoost</option>
+              </select>
+              <button type="submit" class="btn btn-primary btn-analyze" onclick="document.getElementById('which_input').value='url'">Analyze URL</button>
             </div>
-            <br>
-            <label for="model_choice"><strong>Select Model:</strong></label>
-            <select name="model_choice">
-                <option value="Random Forest" {% if model_choice=="Random Forest" %}selected{% endif %}>Random Forest</option>
-                <option value="XGBoost" {% if model_choice=="XGBoost" %}selected{% endif %}>XGBoost</option>
-            </select>
-            <br><br>
-            <button type="submit">Train & Predict</button>
-        </form>
 
-        <!-- Results -->
-        {% if prediction %}
-            <h2>Prediction Result</h2>
-            <p><strong>Output:</strong> 
-                <span class="{{ 'pred-benign' if prediction=='Benign' else 'pred-malicious' }}">{{ prediction }}</span>
-            </p>
-        {% endif %}
+            <!-- PE -->
+            <div class="input-group input-modular">
+              <input name="pe_input" type="file" accept=".exe,.dll" class="form-control input-bar">
+              <button type="submit" class="btn btn-warning btn-analyze" onclick="document.getElementById('which_input').value='pe'">Analyze PE</button>
+            </div>
 
-        <!-- Model accuracies -->
-        {% if accuracies %}
-            <h2>Model Accuracies</h2>
-            <ul>
-                <li><strong>Random Forest:</strong> {{ accuracies["Random Forest"] }}%</li>
-                <li><strong>XGBoost:</strong> {{ accuracies["XGBoost"] }}%</li>
-            </ul>
-        {% endif %}
+            <!-- APK -->
+            <div class="input-group input-modular">
+              <input name="apk_input" type="file" accept=".apk" class="form-control input-bar">
+              <button type="submit" class="btn btn-success btn-analyze" onclick="document.getElementById('which_input').value='apk'">Analyze APK</button>
+            </div>
 
-        <!-- Visualization -->
-        {% if f1 %}
-            <h2>Evaluation</h2>
-            <p><strong>F1 Score:</strong> {{ f1 }}</p>
-            <p><strong>Confusion Matrix:</strong> {{ cm }}</p>
-        {% endif %}
+            <small class="text-muted">Click any Analyze button — results will open on the dashboard with metrics and visualizations.</small>
+          </form>
+        </div>
+
+        <!-- right: title / modular look -->
+        <div class="col-lg-6 text-center title-col">
+          <div class="logo-pill">🛡</div>
+          <h1 class="title-main">Neuro Defend</h1>
+          <p class="lead text-muted">Malware detection using classical ML. Fast scans • Clear insights</p>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

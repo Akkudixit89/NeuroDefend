@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Neuro Defend — Dashboard</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-gradient">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">🛡 Neuro Defend</a>
+    <div class="ms-auto">
+      <a class="btn btn-outline-light" href="/">New Scan</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-5">
+
+  <div class="row g-4">
+
+    <!-- Left column: prediction & upload info -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm p-4 fade-in">
+        <h6 class="text-muted">Prediction</h6>
+        <div class="mt-3 text-center">
+          <div class="prediction-pill
+            {% if prediction == 'Benign' %}pred-benign
+            {% elif prediction == 'Malicious' %}pred-malicious
+            {% else %}pred-neutral{% endif %}">
+            <strong class="fs-4">{{ prediction }}</strong>
+          </div>
+          <p class="small text-muted mt-2">{{ input_summary }}</p>
+          {% if uploaded_filename %}
+            <p class="small text-muted">Saved as: <code>{{ uploaded_filename }}</code></p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card shadow-sm p-3 mt-4 fade-in delay-1">
+        <h6 class="text-muted">Selected Model</h6>
+        <h5 class="mb-0">{{ metrics.model }}</h5>
+        <p class="small text-muted mt-2">Accuracy: <strong>{{ metrics.accuracy }}%</strong></p>
+      </div>
+
+      <div class="card shadow-sm p-3 mt-4 fade-in delay-2">
+        <h6 class="text-muted">F1 Score</h6>
+        <div class="d-flex align-items-center justify-content-center py-3">
+          <canvas id="f1Gauge" width="180" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: charts & confusion matrix -->
+    <div class="col-lg-8">
+
+      <div class="card shadow-sm p-4 fade-in">
+        <h6 class="mb-3">Model Accuracy Comparison</h6>
+        <canvas id="accChart" height="100"></canvas>
+      </div>
+
+      <div class="card shadow-sm p-4 mt-4 fade-in delay-1">
+        <h6 class="mb-3">Confusion Matrix</h6>
+        <div class="table-responsive">
+          <table class="table table-bordered text-center mb-3">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Pred: Benign (0)</th>
+                <th>Pred: Malicious (1)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>True: Benign (0)</th>
+                <td>{{ cm[0][0] }}</td>
+                <td>{{ cm[0][1] }}</td>
+              </tr>
+              <tr>
+                <th>True: Malicious (1)</th>
+                <td>{{ cm[1][0] }}</td>
+                <td>{{ cm[1][1] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <canvas id="cmHeat" height="220"></canvas>
+          </div>
+          <div class="col-md-6 d-flex align-items-center">
+            <div>
+              <h6>Details</h6>
+              <ul>
+                <li>F1 score (weighted): <strong>{{ metrics.f1_score }}</strong></li>
+                <li>Accuracy (selected): <strong>{{ metrics.accuracy }}%</strong></li>
+                <li>Models compared: Random Forest & XGBoost</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  // Accuracy Bar Chart
+  const accCtx = document.getElementById('accChart').getContext('2d');
+  new Chart(accCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Random Forest','XGBoost'],
+      datasets: [{
+        label: 'Accuracy (%)',
+        data: [{{ accuracies['Random Forest'] }}, {{ accuracies['XGBoost'] }}],
+        backgroundColor: ['rgba(79,70,229,0.85)','rgba(16,185,129,0.85)'],
+        borderRadius: 8,
+      }]
+    },
+    options: { animation: { duration: 1200 }, scales: { y: { beginAtZero: true, max: 100 } } }
+  });
+
+  // F1 gauge (simple donut)
+  const f1Ctx = document.getElementById('f1Gauge').getContext('2d');
+  const f1Val = Math.round(parseFloat("{{ metrics.f1_score }}") * 100);
+  new Chart(f1Ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['F1', 'Remaining'],
+      datasets: [{
+        data: [f1Val, 100 - f1Val],
+        backgroundColor: ['rgba(79,70,229,0.9)','rgba(226,232,240,0.6)'],
+        cutout: '70%'
+      }]
+    },
+    options: {
+      animation: { duration: 1200 },
+      plugins: {
+        tooltip: { enabled: false },
+        legend: { display: false },
+        beforeDraw: function() {}
+      }
+    }
+  });
+
+  // Confusion matrix heat-like chart (2x2)
+  const cmCtx = document.getElementById('cmHeat').getContext('2d');
+  const cmData = {
+    labels: ['Pred Benign', 'Pred Malicious'],
+    datasets: [
+      {
+        label: 'True Benign',
+        data: [{{ cm[0][0] }}, {{ cm[0][1] }}],
+        backgroundColor: ['rgba(99,132,255,0.85)', 'rgba(255,99,132,0.85)']
+      },
+      {
+        label: 'True Malicious',
+        data: [{{ cm[1][0] }}, {{ cm[1][1] }}],
+        backgroundColor: ['rgba(16,185,129,0.85)', 'rgba(250,204,21,0.85)']
+      }
+    ]
+  };
+  new Chart(cmCtx, {
+    type: 'bar',
+    data: cmData,
+    options: {
+      indexAxis: 'y',
+      animation: { duration: 1200 },
+      scales: { x: { beginAtZero: true } }
+    }
+  });
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Neuro Defend — Dashboard</title>
+
+  <!-- Bootstrap & Chart.js -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .navbar {
+      background: linear-gradient(90deg, #0f172a, #1e293b);
+    }
+
+    .container {
+      max-width: 1250px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 1rem;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.18);
+      transform: translateY(-3px);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 280px;
+      width: 100%;
+    }
+
+    .fade-in {
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .prediction-pill {
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      display: inline-block;
+      box-shadow: 0 0 15px rgba(59,130,246,0.4);
+      min-width: 180px;
+    }
+
+    .pred-benign { background: linear-gradient(90deg,#10b981,#059669); color: white; }
+    .pred-malicious { background: linear-gradient(90deg,#ef4444,#b91c1c); color: white; }
+    .pred-neutral { background: linear-gradient(90deg,#6b7280,#374151); color: white; }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+    }
+
+    .metric-badge {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      box-shadow: inset 0 0 10px rgba(56,189,248,0.25);
+    }
+
+    .metric-badge h6 {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    .metric-badge p {
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    footer {
+      border-top: 1px solid #334155;
+    }
+  </style>
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold text-info" href="/">🧠 Neuro Defend</a>
+    <div class="ms-auto">
+      <a class="btn btn-outline-info" href="/">🔄 New Scan</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-5 fade-in">
+  <div class="row g-4 align-items-stretch">
+
+    <!-- LEFT PANEL -->
+    <div class="col-lg-4 d-flex flex-column gap-4">
+      <div class="card p-4 flex-fill text-center">
+        <h6 class="text-info mb-3">Prediction Result</h6>
+        <div>
+          <div class="prediction-pill 
+            {% if prediction == 'Benign' %}pred-benign
+            {% elif prediction == 'Malicious' %}pred-malicious
+            {% else %}pred-neutral{% endif %}">
+            {{ prediction }}
+          </div>
+          <p class="small text-muted mt-3 mb-1">{{ input_summary }}</p>
+          {% if uploaded_filename %}
+            <p class="small text-muted">📁 {{ uploaded_filename }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card p-4 flex-fill">
+        <h6 class="text-info mb-3">Model Overview</h6>
+        <h5 class="fw-bold text-light">{{ metrics.model }}</h5>
+        <div class="metric-grid mt-3">
+          <div class="metric-badge">
+            <h6>Accuracy</h6>
+            <p class="fw-bold text-info">{{ metrics.accuracy }}%</p>
+          </div>
+          <div class="metric-badge">
+            <h6>F1 Score</h6>
+            <p class="fw-bold text-info">{{ metrics.f1_score }}</p>
+          </div>
+          <div class="metric-badge">
+            <h6>Precision</h6>
+            <p class="fw-bold text-info">{{ metrics.precision }}</p>
+          </div>
+          <div class="metric-badge">
+            <h6>Recall</h6>
+            <p class="fw-bold text-info">{{ metrics.recall }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="col-lg-8 d-flex flex-column gap-4">
+
+      <!-- Model Accuracy Donut -->
+      <div class="card p-4 flex-fill">
+        <h6 class="mb-3 text-info text-center">📊 Model Accuracy Comparison</h6>
+        <div class="chart-container mx-auto" style="max-width: 500px;">
+          <canvas id="accuracyPie"></canvas>
+        </div>
+      </div>
+
+      <!-- F1 + Confusion -->
+      <div class="card p-4 flex-fill">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <h6 class="text-info text-center mb-2">🎯 F1 Gauge</h6>
+            <div class="chart-container"><canvas id="f1Gauge"></canvas></div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="text-info text-center mb-2">📉 Confusion Matrix</h6>
+            <div class="chart-container"><canvas id="cmHeat"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="card p-4 text-center flex-fill">
+        <h6 class="text-info mb-3">📈 Additional Insights</h6>
+        <img src="data:image/png;base64,{{ accuracy_chart }}" class="img-fluid rounded shadow-sm my-2" alt="Accuracy Chart">
+        <img src="data:image/png;base64,{{ performance_chart }}" class="img-fluid rounded shadow-sm my-2" alt="Performance Chart">
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="text-center py-4 text-muted">
+  🌐 <a href="https://github.com/Akkudixit89/NeuroDefend.git" target="_blank" class="text-info text-decoration-none">View Project on GitHub</a>
+</footer>
+
+<!-- Scripts -->
+<script>
+const ctxPie = document.getElementById("accuracyPie").getContext("2d");
+const accuracyData = {{ accuracies.values() | list | safe }};
+const modelLabels = {{ accuracies.keys() | list | safe }};
+const maxAcc = Math.max(...accuracyData);
+const bestModel = modelLabels[accuracyData.indexOf(maxAcc)];
+
+const gradients = modelLabels.map((_, i) => {
+  const g = ctxPie.createLinearGradient(0, 0, 0, 200);
+  const colors = [
+    ["#00d4ff","#007cf0"],
+    ["#00ff9d","#00c26e"],
+    ["#f9ce34","#f48c06"],
+    ["#ff4d6d","#d00000"],
+    ["#a855f7","#7e22ce"]
+  ];
+  g.addColorStop(0, colors[i % colors.length][0]);
+  g.addColorStop(1, colors[i % colors.length][1]);
+  return g;
+});
+
+const accuracyPie = new Chart(ctxPie, {
+  type: "doughnut",
+  data: {
+    labels: modelLabels,
+    datasets: [{
+      data: accuracyData,
+      backgroundColor: gradients,
+      borderWidth: 2,
+      borderColor: "#0f172a",
+      hoverOffset: 12
+    }]
+  },
+  options: {
+    cutout: "70%",
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: { color: "#e2e8f0", padding: 12, font: { size: 13 } }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => `${ctx.label}: ${ctx.parsed.toFixed(2)}%`
+        },
+        backgroundColor: "rgba(15,23,42,0.9)",
+        borderColor: "#38bdf8",
+        borderWidth: 1,
+        titleColor: "#38bdf8",
+        bodyColor: "#e2e8f0"
+      }
+    },
+    animation: { animateScale: true, animateRotate: true, duration: 1500, easing: "easeOutBack" }
+  },
+  plugins: [{
+    id: "centerText",
+    beforeDraw(chart) {
+      const { width, height, ctx } = chart;
+      ctx.restore();
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#38bdf8";
+      ctx.font = "bold 18px Poppins";
+      ctx.fillText("Best Model", width / 2, height / 2 - 10);
+      ctx.font = "bold 22px Poppins";
+      ctx.fillStyle = "#f8fafc";
+      ctx.fillText(bestModel, width / 2, height / 2 + 15);
+      ctx.save();
+    }
+  }]
+});
+
+let rotation = 0;
+function rotateChart() {
+  rotation += 0.3;
+  accuracyPie.options.rotation = rotation;
+  accuracyPie.update("none");
+  requestAnimationFrame(rotateChart);
+}
+rotateChart();
+
+// F1 Gauge
+const f1Val = Math.round(parseFloat("{{ metrics.f1_score }}") * 100);
+new Chart(document.getElementById("f1Gauge"), {
+  type: "doughnut",
+  data: {
+    labels: ["F1", "Remaining"],
+    datasets: [{
+      data: [f1Val, 100 - f1Val],
+      backgroundColor: ["#38bdf8", "#1e293b"],
+      cutout: "75%"
+    }]
+  },
+  options: { plugins: { legend: { display: false } }, animation: { duration: 1500 } }
+});
+
+// Confusion Matrix
+new Chart(document.getElementById("cmHeat"), {
+  type: "bar",
+  data: {
+    labels: ["Pred Benign", "Pred Malicious"],
+    datasets: [
+      { label: "True Benign", data: [{{ cm[0][0] }}, {{ cm[0][1] }}], backgroundColor: "#22d3ee" },
+      { label: "True Malicious", data: [{{ cm[1][0] }}, {{ cm[1][1] }}], backgroundColor: "#f87171" }
+    ]
+  },
+  options: {
+    indexAxis: "y",
+    scales: {
+      x: { beginAtZero: true, grid: { color: "#334155" } },
+      y: { grid: { color: "#334155" } }
+    },
+    plugins: { legend: { position: "bottom", labels: { color: "#cbd5e1" } } },
+    animation: { duration: 1500 }
+  }
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

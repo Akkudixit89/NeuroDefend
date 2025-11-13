@@ -1,0 +1,144 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Body and page layout */
+body {
+  background: #f6f9fc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Wrapper */
+.page-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 20px 0;
+}
+
+/* Main Card */
+.main-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 40px 60px;
+  width: 90%;
+  max-width: 1200px;
+}
+
+/* Input Section */
+.input-section {
+  width: 50%;
+}
+
+.input-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+input[type="text"],
+input[type="file"],
+select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 60%;
+  font-size: 1rem;
+}
+
+select {
+  width: 35%;
+}
+
+.note {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Title Section */
+.title-section {
+  text-align: center;
+  width: 45%;
+}
+
+.title-section h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.title-section p {
+  margin-top: 10px;
+  color: #555;
+  font-size: 1.1rem;
+}
+
+/* Buttons */
+.btn {
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+}
+
+.btn.blue {
+  background-color: #007bff;
+}
+
+.btn.yellow {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.btn.green {
+  background-color: #198754;
+}
+
+/* Footer */
+footer {
+  background-color: #fff;
+  width: 100%;
+  padding: 15px 0;
+  text-align: center;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+footer p {
+  color: #444;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+footer a {
+  text-decoration: none;
+  color: #007bff;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+footer a:hover {
+  color: #0056b3;
+}

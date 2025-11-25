@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import f1_score, confusion_matrix
+from sklearn.metrics import f1_score, confusion_matrix, precision_score, recall_score
 import xgboost as xgb
 import warnings
 
@@ -91,18 +91,29 @@ def evaluate_model(model, vectorizer, urls_data):
     preds = model.predict(X)
 
     f1 = round(f1_score(y, preds, average='weighted'), 3)
+    precision = round(precision_score(y, preds, average='weighted', zero_division=0), 3)
+    recall = round(recall_score(y, preds, average='weighted', zero_division=0), 3)
     cm = confusion_matrix(y, preds).tolist()
-    return f1, cm
+    return f1, cm, precision, recall
 
 
 # -----------------------
 # Dashboard metrics summary
 # -----------------------
-def get_metrics_summary(model_name, model, accuracies, f1, cm):
-    """Return summary dictionary for dynamic dashboard display."""
-    return {
+def get_metrics_summary(model_name, model, accuracies, f1, cm, precision=None, recall=None):
+    """Return summary dictionary for dynamic dashboard display.
+
+    precision and recall are optional (fractions 0-1). If provided, include them.
+    """
+    summary = {
         "model": model_name,
         "accuracy": accuracies.get(model_name, "N/A"),
         "f1_score": f1,
         "confusion_matrix": cm
     }
+    # include precision/recall if available
+    if precision is not None:
+        summary["precision"] = precision
+    if recall is not None:
+        summary["recall"] = recall
+    return summary
